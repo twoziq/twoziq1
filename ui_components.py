@@ -1,5 +1,6 @@
 import streamlit as st
 import plotly.graph_objects as go
+import seaborn as sns
 
 def inject_custom_css():
     st.markdown("""
@@ -25,3 +26,24 @@ def format_value(val):
     if val >= 1e12: return f"{val / 1e12:,.2f}T"
     if val >= 1e9: return f"{val / 1e9:,.2f}B"
     return f"{val:,.2f}"
+
+def plot_distribution_chart(df, target_col, years):
+    # 최근 n개년 데이터 추출 (결측치 제외)
+    data = df.iloc[:years][target_col].dropna()
+    
+    fig = plt.Figure(figsize=(7, 5), dpi=100)
+    ax = fig.add_subplot(111)
+    
+    # 히스토그램 및 밀도함수(KDE)
+    sns.histplot(data, kde=True, ax=ax, color='#2E59A7', bins=15, stat="density", alpha=0.5)
+    
+    mean_val = data.mean()
+    ax.axvline(mean_val, color='red', linestyle='--', label=f'평균: {mean_val:.2f}%')
+    ax.axvline(0, color='black', linewidth=1.5)
+    
+    ax.set_title(f'{target_col} 수익률 분포 (최근 {len(data)}년)')
+    ax.set_xlabel('연간 수익률 (%)')
+    ax.set_ylabel('밀도')
+    ax.legend()
+    
+    return fig
