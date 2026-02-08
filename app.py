@@ -52,6 +52,17 @@ elif st.session_state.active_tab == "적립식 투자":
     df_hist, err = dl.load_historical_data(ticker, start_date, end_date)
     if not err:
         dca_res = al.calculate_dca_simulation(df_hist, 100, "매주")
+        
+        # 최종 요약 (상단)
+        final_investment = dca_res['Cumulative_Investment'].iloc[-1]
+        final_value = dca_res['Current_Value'].iloc[-1]
+        total_return = ((final_value - final_investment) / final_investment) * 100
+        
+        c1, c2, c3 = st.columns(3)
+        c1.metric("최종 평가금액", f"${final_value:,.2f}")
+        c2.metric("수익률", f"{total_return:+.2f}%")
+        c3.metric("총 수익", f"${final_value - final_investment:+,.2f}")
+        
         st.plotly_chart(ui.plot_dca_chart(dca_res, ticker), use_container_width=True)
 
 elif st.session_state.active_tab == "역사적 분포(100년)":
