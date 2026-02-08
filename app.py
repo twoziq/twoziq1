@@ -22,6 +22,10 @@ with st.sidebar:
     start_d = TODAY - timedelta(days=period_map[sel_p])
     start_date = st.date_input("시작일", value=start_d).strftime('%Y-%m-%d')
     end_date = TODAY.strftime('%Y-%m-%d')
+    
+    # 티커 정보 표시 영역 (세션 상태에서 가져오기)
+    if 'ticker_start_date' in st.session_state:
+        st.caption(f"📅 {st.session_state.get('current_ticker', '')} 데이터 시작: {st.session_state['ticker_start_date']}")
 
 # 메뉴 탭
 menu = ["빅테크 PER", "적립식 투자", "다중 티커 비교", "역사적 분포"]
@@ -51,6 +55,10 @@ elif st.session_state.active_tab == "적립식 투자":
     ticker = st.text_input("티커 입력", value="QQQ").upper()
     df_hist, err = dl.load_historical_data(ticker, start_date, end_date)
     if not err:
+        # 티커 정보를 세션 상태에 저장
+        st.session_state['current_ticker'] = ticker
+        st.session_state['ticker_start_date'] = df_hist.index[0].strftime('%Y-%m-%d')
+        
         dca_res = al.calculate_dca_simulation(df_hist, 100, "매주")
         
         # 최종 요약 (상단)
